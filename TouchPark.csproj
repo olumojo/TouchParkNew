@@ -32,12 +32,18 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationIcon>touchparkicon.ico</ApplicationIcon>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="CcTalkCommLib">
       <HintPath>lib\CcTalkCommLib.dll</HintPath>
     </Reference>
     <Reference Include="CraftedDiagnostics">
       <HintPath>lib\CraftedDiagnostics.dll</HintPath>
+    </Reference>
+    <Reference Include="FastMember, Version=1.0.0.9, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>packages\FastMember.1.1.0\lib\net40\FastMember.dll</HintPath>
     </Reference>
     <Reference Include="GraphiteReportPublisher">
       <HintPath>lib\GraphiteReportPublisher.dll</HintPath>
@@ -102,9 +108,12 @@
     <Compile Include="frmCreditCardPaymentError.cs">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Include="GCPParkingPermit.cs" />
     <Compile Include="Services\Extension.cs" />
     <Compile Include="Services\MovementService.cs" />
     <Compile Include="Services\WebServiceClient.cs" />
+    <Compile Include="UserInformation.cs" />
+    <Compile Include="UserInformationSetUpSection.cs" />
     <Compile Include="VehicleMovement.cs" />
     <Compile Include="WeeklyParkingTariff.cs" />
     <Compile Include="frmStartScreen.cs">
@@ -210,6 +219,9 @@
   <ItemGroup>
     <None Include="App.config" />
     <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="touchparkicon.ico" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

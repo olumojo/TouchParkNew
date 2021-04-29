@@ -188,7 +188,8 @@ namespace TouchPark
       {
         lock (CCacheData._CacheUserInfoDataFromDatabaseLocker)
         {
-          Console.WriteLine("Caching user info data.");
+          Console.WriteLine("Caching user info data.");          
+          // DataTable dataforCacheUserInfo = new CGetVehicleDataForCache().GetDataforCacheUserInfoFromConfig();
           DataTable dataforCacheUserInfo = new CGetVehicleDataForCache().GetDataforCacheUserInfo();
           DataSet dataSet = new DataSet();
           string path = ConfigurationManager.AppSettings["cacheLocation"].ToString();
@@ -258,49 +259,50 @@ namespace TouchPark
       return table;
     }
 
-    public static void CreateDefaultUserInfoDataCacheIfNotExists()
-    {
-      try
-      {
-        lock (CCacheData._CreateDefaultUserInfoDataCacheIfNotExistsLocker)
+        public static void CreateDefaultUserInfoDataCacheIfNotExists()
         {
-          string path = ConfigurationManager.AppSettings["cacheLocation"].ToString();
-          if (!Directory.Exists(path))
-            Directory.CreateDirectory(path);
-          string str = string.Format("{0}DataUserTable.xml", (object) path);
-          if (System.IO.File.Exists(str))
-            return;
-          string codeDataFilePath = Settings.Default.DummyUserCodeDataFilePath;
-          if (codeDataFilePath != null && System.IO.File.Exists(codeDataFilePath))
-          {
-            System.IO.File.Copy(codeDataFilePath, str, true);
-          }
-          else
-          {
-            DataTable table = new DataTable("Table1");
-            DataSet dataSet = new DataSet();
-            table.Columns.Add(new DataColumn("username", typeof (string)));
-            table.Columns.Add(new DataColumn("passcode", typeof (string)));
-            table.Columns.Add(new DataColumn("userInformationID", typeof (int)));
-            DataRow row = table.NewRow();
-            row["username"] = (object) "Test";
-            row["passcode"] = (object) "0450";
-            row["UserInformationID"] = (object) "9999";
-            table.Rows.Add(row);
-            if (table.Rows.Count == 0)
-              return;
-            dataSet.Tables.Add(table);
-            dataSet.WriteXml(path + "DataUserTable.xml", XmlWriteMode.WriteSchema);
-          }
+            try
+            {
+                lock (CCacheData._CreateDefaultUserInfoDataCacheIfNotExistsLocker)
+                {
+                    string path = ConfigurationManager.AppSettings["cacheLocation"].ToString();
+                    if (!Directory.Exists(path))
+                        Directory.CreateDirectory(path);
+                    string str = string.Format("{0}DataUserTable.xml", (object)path);
+                    if (System.IO.File.Exists(str))
+                        return;
+                    //string codeDataFilePath = Settings.Default.DummyUserCodeDataFilePath;
+                    //if (codeDataFilePath != null && System.IO.File.Exists(codeDataFilePath))
+                    //{
+                    //  System.IO.File.Copy(codeDataFilePath, str, true);
+                    //}
+                    //else
+                    // {
+                    DataTable table = new DataTable("Table1");
+                    DataSet dataSet = new DataSet();
+                    DataTable dataforCacheUserInfo = new CGetVehicleDataForCache().GetDataforCacheUserInfoFromConfig();
+                    //table.Columns.Add(new DataColumn("username", typeof (string)));
+                    //table.Columns.Add(new DataColumn("passcode", typeof (string)));
+                    //table.Columns.Add(new DataColumn("userInformationID", typeof (int)));
+                    //DataRow row = table.NewRow();
+                    //row["username"] = (object) "Test";
+                    //row["passcode"] = (object) "0450";
+                    //row["UserInformationID"] = (object) "9999";
+                    //table.Rows.Add(row);
+                    //if (table.Rows.Count == 0)
+                    //  return;
+                    dataSet.Tables.Add(dataforCacheUserInfo);
+                    dataSet.WriteXml(path + "DataUserTable.xml", XmlWriteMode.WriteSchema);
+                    //}
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Write(ex);
+            }
         }
-      }
-      catch (Exception ex)
-      {
-        Log.Write(ex);
-      }
-    }
 
-    public static void CreateTestPermit()
+        public static void CreateTestPermit()
     {
       double testPermitInterval = Settings.Default.TestPermitInterval;
       CCacheData.WriteParkingPermitToXmlFile(new ParkingPermitInfo()

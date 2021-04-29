@@ -21,7 +21,7 @@ using TouchPark.Services;
 
 namespace TouchPark
 {
-  public class frmSearchVehicle : Form
+    public class frmSearchVehicle : Form
   {
     private string m_ApplicationType = Settings.Default.ApplicationType;
     private List<PictureBox> m_allImgOverviewSearch;
@@ -38,7 +38,7 @@ namespace TouchPark
     private PictureBox imgDisplayVehicleBorder;
     private Panel pnlRegistrationDisplay;
     private Button cmdCancel;
-    private Button cmdEnter;
+    private Button cmdVehicleNotPresent;
     private Panel pnlKeyboard;
     private Button cmdKeyA;
     private Button cmdKeyB;
@@ -90,7 +90,8 @@ namespace TouchPark
     private Timer DisplayTimer;
     private Label lblInstruactionPopUp;
     private Timer tmrShowTip;
-    private Button cmdVehicleNotPresent;
+    private Button cmdEnter;
+    private Button cmdIcannotFindMyVehicle;
     private RegistrationPlate registrationPlate1;
 
     [DllImport("Gdi32.dll")]
@@ -146,7 +147,7 @@ namespace TouchPark
     {
       this.lblInstructionHeader.Text = "";
       this.registrationPlate1.VehicleRegistrationMark = "";
-      this.lblRegistrationInstruction.Text = "PLEASE ENTER YOUR VEHICLE REGISTRATION USING THE TOUCHSCREEN.";
+      this.lblRegistrationInstruction.Text = "PLEASE ENTER ANY THREE LETTERS OF YOUR VEHICLE REGISTRATION USING THE TOUCHSCREEN AND PRESS ENTER";
       this.m_NumberOfKeys = 0;
       this.TryToSetBackgroundImage();
       if (!(this.m_ApplicationType == "ServiceStationPark") && !(this.m_ApplicationType == "PermitPark") && !(this.m_ApplicationType == "PermitPark2"))
@@ -154,7 +155,7 @@ namespace TouchPark
       this.cmdCancel.Visible = false;
       if (!(this.m_ApplicationType == "PermitPark"))
         return;
-      this.cmdEnter.Visible = true;
+      this.cmdVehicleNotPresent.Visible = true;
     }
 
     private void cmdCancel_Click(object sender, EventArgs e)
@@ -187,16 +188,17 @@ namespace TouchPark
         this.lblSearchInstruction.Visible = true;
         this.lblRegistrationInstruction.Visible = false;
         if (!(this.m_ApplicationType == "PermitPark"))
-          this.cmdVehicleNotPresent.Visible = true;
+          this.cmdEnter.Visible = !cmdVehicleNotPresent.Visible;
       }
       else
       {
-        this.lblSearchInstruction.Visible = false;
+        this.lblSearchInstruction.Visible = true;
         this.lblRegistrationInstruction.Visible = true;
         if (!(this.m_ApplicationType == "PermitPark"))
-          this.cmdVehicleNotPresent.Visible = false;
+          this.cmdEnter.Visible = false;
       }
       this.DisplayTimer.Start();
+           
     }
 
     private void PrintAuditReport()
@@ -232,76 +234,83 @@ namespace TouchPark
     private void cmdEnter_Click(object sender, EventArgs e)
     {
       this.DisplayTimer.Stop();
-      bool flag = false;
-      try
-      {
-        if (!(this.registrationPlate1.VehicleRegistrationMark != ""))
-          return;
-        if (this.registrationPlate1.VehicleRegistrationMark == Settings.Default.AuditReportCode.ToUpper())
-        {
-          this.PrintAuditReport();
-          this.registrationPlate1.VehicleRegistrationMark = string.Empty;
-          this.cmdVehicleNotPresent.Visible = false;
-          this.DisplayTimer.Start();
-        }
-        else
-        {
-          this.SearchForCars(this.registrationPlate1.VehicleRegistrationMark);
-          if (this.m_allVehicleInfo.Count == 0)
-          {
-            if (this.m_parkingPermit == null)
-              this.m_parkingPermit = new ParkingPermitInfo();
-            this.m_parkingPermit.VehicleRegMark = this.registrationPlate1.VehicleRegistrationMark;
-            this.m_parkingPermit.StartDate = DateTime.Now;
-            int num = (int) new frmConfirmVRM((string) null, (string) null, this.m_parkingPermit).ShowDialog();
-          }
-          else
-          {
-            int index = 0;
-            foreach (CVehicleInfo cvehicleInfo in this.m_allVehicleInfo)
-            {
-              if (cvehicleInfo.VRM == this.registrationPlate1.VehicleRegistrationMark)
-              {
-                this.m_allImgOverviewSearch[index].ImageLocation = cvehicleInfo.overviewImageLocation;
-                this.m_allImgVRMSearch[index].ImageLocation = cvehicleInfo.plateImageLocation;
-                if (this.m_parkingPermit == null)
-                  this.m_parkingPermit = new ParkingPermitInfo();
-                this.m_parkingPermit.VehicleRegMark = cvehicleInfo.VRM;
-                this.m_parkingPermit.StartDate = DateTime.Parse(cvehicleInfo.inwardTime);
-                int num = (int) new frmConfirmVehicle(this.m_allImgOverviewSearch[index].ImageLocation, this.m_allImgVRMSearch[index].ImageLocation, this.m_parkingPermit)
-                {
-                  VehicleInfo = cvehicleInfo
-                }.ShowDialog();
-                flag = true;
-              }
-            }
-            if (!flag)
-            {
-              if (this.m_parkingPermit == null)
-                this.m_parkingPermit = new ParkingPermitInfo();
-              this.m_parkingPermit.VehicleRegMark = this.registrationPlate1.VehicleRegistrationMark;
-              this.m_parkingPermit.StartDate = DateTime.Now;
-              int num = (int) new frmConfirmVRM((string) null, (string) null, this.m_parkingPermit).ShowDialog();
-            }
-          }
-          if (!(this.m_ApplicationType == "ServiceStationPark"))
-          {
-            this.Hide();
-          }
-          else
-          {
+      this.m_parkingPermit.VehicleRegMark = this.registrationPlate1.VehicleRegistrationMark;
+            //bool flag = false;
+            //try
+            //{
+            //  if (!(this.registrationPlate1.VehicleRegistrationMark != ""))
+            //    return;
+            //  if (this.registrationPlate1.VehicleRegistrationMark == Settings.Default.AuditReportCode.ToUpper())
+            //  {
+            //    this.PrintAuditReport();
+            //    this.registrationPlate1.VehicleRegistrationMark = string.Empty;
+            //    this.cmdVehicleNotPresent.Visible = false;
+            //    this.DisplayTimer.Start();
+            //  }
+            //  else
+            //  {
+            //    this.SearchForCars(this.registrationPlate1.VehicleRegistrationMark);
+            //    if (this.m_allVehicleInfo.Count == 0)
+            //    {
+            //      if (this.m_parkingPermit == null)
+            //        this.m_parkingPermit = new ParkingPermitInfo();
+            //      this.m_parkingPermit.VehicleRegMark = this.registrationPlate1.VehicleRegistrationMark;
+            //      this.m_parkingPermit.StartDate = DateTime.Now;
+            //      int num = (int) new frmConfirmVRM((string) null, (string) null, this.m_parkingPermit).ShowDialog();
+            //    }
+            //    else
+            //    {
+            //      int index = 0;
+            //      foreach (CVehicleInfo cvehicleInfo in this.m_allVehicleInfo)
+            //      {
+            //        if (cvehicleInfo.VRM == this.registrationPlate1.VehicleRegistrationMark)
+            //        {
+            //          this.m_allImgOverviewSearch[index].ImageLocation = cvehicleInfo.overviewImageLocation;
+            //          this.m_allImgVRMSearch[index].ImageLocation = cvehicleInfo.plateImageLocation;
+            //          if (this.m_parkingPermit == null)
+            //            this.m_parkingPermit = new ParkingPermitInfo();
+            //          this.m_parkingPermit.VehicleRegMark = cvehicleInfo.VRM;
+            //          this.m_parkingPermit.StartDate = DateTime.Parse(cvehicleInfo.inwardTime);
+            //          int num = (int) new frmConfirmVehicle(this.m_allImgOverviewSearch[index].ImageLocation, this.m_allImgVRMSearch[index].ImageLocation, this.m_parkingPermit)
+            //          {
+            //            VehicleInfo = cvehicleInfo
+            //          }.ShowDialog();
+            //          flag = true;
+            //        }
+            //      }
+            //      if (!flag)
+            //      {
+            //        if (this.m_parkingPermit == null)
+            //          this.m_parkingPermit = new ParkingPermitInfo();
+            //        this.m_parkingPermit.VehicleRegMark = this.registrationPlate1.VehicleRegistrationMark;
+            //        this.m_parkingPermit.StartDate = DateTime.Now;
+            //        int num = (int) new frmConfirmVRM((string) null, (string) null, this.m_parkingPermit).ShowDialog();
+            //      }
+            //    }
+            //    if (!(this.m_ApplicationType == "ServiceStationPark"))
+            //    {
+            //      this.Hide();
+            //    }
+            //    else
+            //    {
+            //      this.registrationPlate1.VehicleRegistrationMark = "";
+            //      this.m_NumberOfKeys = 0;
+            //      this.ClearImageDisplay();
+            //      this.DisplayTimer.Start();
+            //    }
+            //  }
+            //}
+            //catch (Exception ex)
+            //{
+            //  Log.Write(ex);
+            //}
+            int num = (int)new frmConfirmVRM((string)null, (string)null, this.m_parkingPermit).ShowDialog();
             this.registrationPlate1.VehicleRegistrationMark = "";
-            this.m_NumberOfKeys = 0;
-            this.ClearImageDisplay();
+            cmdVehicleNotPresent.Visible = false;
+            cmdEnter.Visible = true;
+            this.lblSearchInstruction.Text = "PLEASE ENTER ANY THREE LETTERS OF YOUR VEHICLE REGISTRATION USING THE TOUCHSCREEN AND PRESS ENTER";
             this.DisplayTimer.Start();
-          }
         }
-      }
-      catch (Exception ex)
-      {
-        Log.Write(ex);
-      }
-    }
 
     private void SearchForCars(string searchVRM)
     {
@@ -320,8 +329,9 @@ namespace TouchPark
       }
       else
       {
-        this.lblSearchInstruction.Text = "If your vehicle does not appear please type in your full registration below and click the enter button.";
-        this.ClearImageDisplay();
+        //this.lblSearchInstruction.Text = "If your vehicle does not appear please type in your full registration below and click the enter button.";
+         this.lblSearchInstruction.Text = "If your vehicle does not appear, click the I can't find my vehicle button.";
+         this.ClearImageDisplay();
         if (!(this.m_ApplicationType == "PermitPark"))
           return;
         this.lblInstruactionPopUp.Hide();
@@ -442,7 +452,7 @@ namespace TouchPark
             Console.WriteLine("/\\/\\/\\/\\/\\---------------------------------------------------/\\/\\/\\/\\/\\");
         }
 
-        private void ClearImageDisplay()
+    private void ClearImageDisplay()
     {
       for (int index = 0; index < 4; ++index)
       {
@@ -451,6 +461,14 @@ namespace TouchPark
       }
       this.PositionSearchLabel();
       this.lblRegistrationInstruction.Visible = true;
+      if(this.cmdIcannotFindMyVehicle.Visible==true)
+       {
+
+          cmdVehicleNotPresent.Visible = false;
+          cmdEnter.Visible = true;
+          this.cmdIcannotFindMyVehicle.Visible = false;
+          this.lblSearchInstruction.Text = "PLEASE ENTER ANY THREE LETTERS OF YOUR VEHICLE REGISTRATION USING THE TOUCHSCREEN AND PRESS ENTER";
+        }
     }
 
     private void PositionSearchLabel()
@@ -495,6 +513,25 @@ namespace TouchPark
         this.ClearImageDisplay();
         this.DisplayTimer.Start();
       }
+      if(num==1)
+      {
+         cmdVehicleNotPresent.Visible = false;
+         cmdEnter.Visible = true;
+         this.cmdIcannotFindMyVehicle.Visible = false;
+        this.lblSearchInstruction.Text = "PLEASE ENTER ANY THREE LETTERS OF YOUR VEHICLE REGISTRATION USING THE TOUCHSCREEN AND PRESS ENTER";
+      }
+      else
+      {
+                cmdVehicleNotPresent.Visible = false;
+                cmdEnter.Visible = true;
+                this.cmdIcannotFindMyVehicle.Visible = false;
+                this.lblSearchInstruction.Text = "PLEASE ENTER ANY THREE LETTERS OF YOUR VEHICLE REGISTRATION USING THE TOUCHSCREEN AND PRESS ENTER";
+                //this.lblSearchInstruction.Text = "ENTER YOUR FULL VEHICLE REGISTRATION DETAILS AND PRESS ENTER";
+                //cmdVehicleNotPresent.Visible = true;
+                //cmdEnter.Visible = false;
+                //this.cmdIcannotFindMyVehicle.Visible = false;
+       }
+     
     }
 
     private void DisplayTimer_Tick(object sender, EventArgs e)
@@ -510,6 +547,18 @@ namespace TouchPark
       this.tmrShowTip.Stop();
     }
 
+    private void cmdIcannotFindMyVehicle_Click(object sender, EventArgs e)
+    {
+        this.DisplayTimer.Stop();
+        this.lblSearchInstruction.Text = "ENTER YOUR FULL VEHICLE REGISTRATION DETAILS AND PRESS ENTER";
+        this.cmdEnter.Visible = false;
+        this.cmdVehicleNotPresent.Visible = true;
+        this.cmdIcannotFindMyVehicle.Visible = false;
+        this.ClearImageDisplay();
+        //this.lblRegistrationInstruction.Text = "PLEASE ENTER ANY THREE LETTERS OF YOUR VEHICLE REGISTRATION USING THE TOUCHSCREEN AND PRESS ENTER";
+        this.DisplayTimer.Start();
+
+    }
     private void cmdVehicleNotPresent_Click(object sender, EventArgs e)
     {
       this.DisplayTimer.Stop();
@@ -522,19 +571,20 @@ namespace TouchPark
         {
           this.PrintAuditReport();
           this.registrationPlate1.VehicleRegistrationMark = string.Empty;
-          this.cmdVehicleNotPresent.Visible = false;
+          this.cmdEnter.Visible = false;
           this.DisplayTimer.Start();
         }
         else
         {
           this.SearchForCars(this.registrationPlate1.VehicleRegistrationMark);
+          this.cmdIcannotFindMyVehicle.Visible = true;
           if (this.m_allVehicleInfo.Count == 0)
           {
             if (this.m_parkingPermit == null)
               this.m_parkingPermit = new ParkingPermitInfo();
             this.m_parkingPermit.VehicleRegMark = this.registrationPlate1.VehicleRegistrationMark;
-            this.m_parkingPermit.StartDate = DateTime.Now;
-            int num = (int) new frmConfirmVRM((string) null, (string) null, this.m_parkingPermit).ShowDialog();
+            this.m_parkingPermit.StartDate = DateTime.Now;                       
+           // int num = (int) new frmConfirmVRM((string) null, (string) null, this.m_parkingPermit).ShowDialog();
           }
           else
           {
@@ -615,8 +665,9 @@ namespace TouchPark
       this.imgDisplayVehicleBackground = new PictureBox();
       this.imgDisplayVehicleBorder = new PictureBox();
       this.pnlRegistrationDisplay = new Panel();
-      this.cmdVehicleNotPresent = new Button();
       this.cmdEnter = new Button();
+      this.cmdIcannotFindMyVehicle = new Button();
+      this.cmdVehicleNotPresent = new Button();
       this.cmdCancel = new Button();
       this.lblInstruactionPopUp = new Label();
       this.registrationPlate1 = new RegistrationPlate();
@@ -717,7 +768,7 @@ namespace TouchPark
       this.lblSearchInstruction.Visible = false;
       this.lblRegistrationInstruction.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
       this.lblRegistrationInstruction.BackColor = Color.Black;
-      this.lblRegistrationInstruction.Font = new Font("Arial", 20.25f, FontStyle.Bold, GraphicsUnit.Point, (byte) 0);
+      this.lblRegistrationInstruction.Font = new Font("Arial", 13.95f, FontStyle.Bold, GraphicsUnit.Point, (byte) 0);
       this.lblRegistrationInstruction.ForeColor = Color.White;
       this.lblRegistrationInstruction.Location = new Point(36, 45);
       this.lblRegistrationInstruction.Name = "lblRegistrationInstruction";
@@ -844,8 +895,9 @@ namespace TouchPark
       this.imgDisplayVehicleBorder.TabIndex = 0;
       this.imgDisplayVehicleBorder.TabStop = false;
       this.pnlRegistrationDisplay.BackColor = Color.Transparent;
-      this.pnlRegistrationDisplay.Controls.Add((Control) this.cmdVehicleNotPresent);
       this.pnlRegistrationDisplay.Controls.Add((Control) this.cmdEnter);
+      this.pnlRegistrationDisplay.Controls.Add((Control)this.cmdIcannotFindMyVehicle);
+      this.pnlRegistrationDisplay.Controls.Add((Control) this.cmdVehicleNotPresent);
       this.pnlRegistrationDisplay.Controls.Add((Control) this.cmdCancel);
       this.pnlRegistrationDisplay.Controls.Add((Control) this.lblInstruactionPopUp);
       this.pnlRegistrationDisplay.Controls.Add((Control) this.registrationPlate1);
@@ -854,9 +906,47 @@ namespace TouchPark
       this.pnlRegistrationDisplay.Name = "pnlRegistrationDisplay";
       this.pnlRegistrationDisplay.Size = new Size(798, 120);
       this.pnlRegistrationDisplay.TabIndex = 4;
+      this.cmdEnter.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+      this.cmdIcannotFindMyVehicle.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+      this.cmdEnter.BackColor = Color.Transparent;
+      this.cmdIcannotFindMyVehicle.BackColor = Color.Transparent;
+      this.cmdIcannotFindMyVehicle.BackgroundImage = (Image)Resources.GreenKey;
+      this.cmdEnter.BackgroundImage = (Image) Resources.GreenKey;
+      this.cmdEnter.BackgroundImageLayout = ImageLayout.Stretch;
+      this.cmdIcannotFindMyVehicle.BackgroundImageLayout = ImageLayout.Stretch;
+      this.cmdEnter.FlatAppearance.BorderSize = 0;
+      this.cmdIcannotFindMyVehicle.FlatAppearance.BorderSize = 0;
+      this.cmdEnter.FlatAppearance.CheckedBackColor = Color.Transparent;
+      this.cmdIcannotFindMyVehicle.FlatAppearance.CheckedBackColor = Color.Transparent;
+      this.cmdEnter.FlatAppearance.MouseDownBackColor = Color.Transparent;
+      this.cmdIcannotFindMyVehicle.FlatAppearance.MouseDownBackColor = Color.Transparent;
+      this.cmdEnter.FlatAppearance.MouseOverBackColor = Color.Transparent;
+      this.cmdIcannotFindMyVehicle.FlatAppearance.MouseOverBackColor = Color.Transparent;
+      this.cmdEnter.FlatStyle = FlatStyle.Flat;
+      this.cmdIcannotFindMyVehicle.FlatStyle = FlatStyle.Flat;
+      this.cmdEnter.Font = new Font("Arial", 18f, FontStyle.Bold, GraphicsUnit.Point, (byte) 0);
+      this.cmdIcannotFindMyVehicle.Font = new Font("Arial", 12f, FontStyle.Bold, GraphicsUnit.Point, (byte)0);
+      this.cmdEnter.ForeColor = Color.Gold;
+      this.cmdIcannotFindMyVehicle.ForeColor = Color.Gold;
+      this.cmdIcannotFindMyVehicle.Location = new Point(440, 25);
+      this.cmdEnter.Location = new Point(608, 25);
+      this.cmdEnter.Name = "cmdVehicleNotPresent";
+      this.cmdIcannotFindMyVehicle.Name = "cmdIcannotFindMyVehicle";
+      this.cmdIcannotFindMyVehicle.Size = new Size(167, 65);
+      this.cmdEnter.Size = new Size(157, 65);
+      this.cmdEnter.TabIndex = 4;
+      this.cmdIcannotFindMyVehicle.TabIndex = 4;
+      this.cmdEnter.Text = "ENTER";
+      this.cmdIcannotFindMyVehicle.Text = "I Can't Find My Vehicle";
+      this.cmdEnter.UseVisualStyleBackColor = false;
+      this.cmdIcannotFindMyVehicle.UseVisualStyleBackColor = false;
+      this.cmdEnter.Visible = false;
+      this.cmdIcannotFindMyVehicle.Visible = false;
+      this.cmdIcannotFindMyVehicle.Click += new EventHandler(this.cmdIcannotFindMyVehicle_Click);
+      this.cmdEnter.Click += new EventHandler(this.cmdVehicleNotPresent_Click);
       this.cmdVehicleNotPresent.Anchor = AnchorStyles.Top | AnchorStyles.Right;
       this.cmdVehicleNotPresent.BackColor = Color.Transparent;
-      this.cmdVehicleNotPresent.BackgroundImage = (Image) Resources.GreenKey;
+      this.cmdVehicleNotPresent.BackgroundImage = (Image) Resources.GreenKeyGloss;
       this.cmdVehicleNotPresent.BackgroundImageLayout = ImageLayout.Stretch;
       this.cmdVehicleNotPresent.FlatAppearance.BorderSize = 0;
       this.cmdVehicleNotPresent.FlatAppearance.CheckedBackColor = Color.Transparent;
@@ -866,32 +956,13 @@ namespace TouchPark
       this.cmdVehicleNotPresent.Font = new Font("Arial", 18f, FontStyle.Bold, GraphicsUnit.Point, (byte) 0);
       this.cmdVehicleNotPresent.ForeColor = Color.Gold;
       this.cmdVehicleNotPresent.Location = new Point(458, 25);
-      this.cmdVehicleNotPresent.Name = "cmdVehicleNotPresent";
+      this.cmdVehicleNotPresent.Name = "cmdEnter";
       this.cmdVehicleNotPresent.Size = new Size(157, 65);
-      this.cmdVehicleNotPresent.TabIndex = 4;
+      this.cmdVehicleNotPresent.TabIndex = 1;
       this.cmdVehicleNotPresent.Text = "ENTER";
       this.cmdVehicleNotPresent.UseVisualStyleBackColor = false;
       this.cmdVehicleNotPresent.Visible = false;
-      this.cmdVehicleNotPresent.Click += new EventHandler(this.cmdVehicleNotPresent_Click);
-      this.cmdEnter.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-      this.cmdEnter.BackColor = Color.Transparent;
-      this.cmdEnter.BackgroundImage = (Image) Resources.GreenKeyGloss;
-      this.cmdEnter.BackgroundImageLayout = ImageLayout.Stretch;
-      this.cmdEnter.FlatAppearance.BorderSize = 0;
-      this.cmdEnter.FlatAppearance.CheckedBackColor = Color.Transparent;
-      this.cmdEnter.FlatAppearance.MouseDownBackColor = Color.Transparent;
-      this.cmdEnter.FlatAppearance.MouseOverBackColor = Color.Transparent;
-      this.cmdEnter.FlatStyle = FlatStyle.Flat;
-      this.cmdEnter.Font = new Font("Arial", 18f, FontStyle.Bold, GraphicsUnit.Point, (byte) 0);
-      this.cmdEnter.ForeColor = Color.Gold;
-      this.cmdEnter.Location = new Point(458, 25);
-      this.cmdEnter.Name = "cmdEnter";
-      this.cmdEnter.Size = new Size(157, 65);
-      this.cmdEnter.TabIndex = 1;
-      this.cmdEnter.Text = "ENTER";
-      this.cmdEnter.UseVisualStyleBackColor = false;
-      this.cmdEnter.Visible = false;
-      this.cmdEnter.Click += new EventHandler(this.cmdEnter_Click);
+      this.cmdVehicleNotPresent.Click += new EventHandler(this.cmdEnter_Click);
       this.cmdCancel.Anchor = AnchorStyles.Top | AnchorStyles.Right;
       this.cmdCancel.BackColor = Color.Transparent;
       this.cmdCancel.BackgroundImage = (Image) Resources.SquareLargeRed;

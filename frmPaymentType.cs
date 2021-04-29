@@ -11,6 +11,7 @@ using System.Runtime.InteropServices;
 using System.Threading;
 using System.Windows.Forms;
 using TouchPark.Properties;
+using TouchPark.Services;
 
 namespace TouchPark
 {
@@ -347,8 +348,8 @@ namespace TouchPark
       }
       else
       {
-        this.imgOverview.ImageLocation = this.m_OverviewLocation;
-        this.imgVRM.ImageLocation = this.m_PlateLocation;
+        this.imgOverview.Image = this.m_OverviewLocation.ToImage();
+        this.imgVRM.Image = this.m_PlateLocation.ToImage();
         this.imgOverview.Location = new Point(107, 110);
         this.imgVRM.Location = new Point(77, 270);
         this.categoryButtonFlowLayoutPanel.Left = 378;

@@ -4,10 +4,14 @@
 // MVID: 2CCDAB4F-96EA-47FE-816A-ABA0F97C0D78
 // Assembly location: C:\Users\olum.ojo\Desktop\TouchPark.exe
 
+using FastMember;
 using RangerServices.Logging;
 using System;
+using System.Collections.Generic;
+using System.Configuration;
 using System.Data;
 using System.Data.SqlClient;
+using System.Linq;
 
 namespace TouchPark
 {
@@ -65,6 +69,21 @@ namespace TouchPark
       }
       return dataTable2;
     }
+
+        public DataTable GetDataforCacheUserInfoFromConfig()
+        {
+            List<UserInfomation> userInfos = ConfigurationManager.GetSection("userInformationSettings") as List<UserInfomation>;
+            if (userInfos != null && userInfos.Any())
+            {
+                DataTable table = new DataTable();
+                using (var reader = ObjectReader.Create(userInfos))
+                {
+                    table.Load(reader);
+                }
+                return table;
+            }
+            return null;
+        }
 
     public DataTable GetDataforCacheUserInfo()
     {

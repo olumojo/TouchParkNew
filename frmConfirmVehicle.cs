@@ -4,6 +4,7 @@
 // MVID: 2CCDAB4F-96EA-47FE-816A-ABA0F97C0D78
 // Assembly location: C:\Users\olum.ojo\Desktop\TouchPark.exe
 
+using RangerServices.Logging;
 using System;
 using System.ComponentModel;
 using System.Drawing;
@@ -89,17 +90,20 @@ namespace TouchPark
     {
       this.ConfirmVehicle = true;
       this.Close();
+      Log.Write("Yes selected after image selection confirmation/vrm confirmation dialog close.");
       this.panel1.Visible = true;
       this.m_ParkingPermit.CaptureDate = DateTime.Now;
       switch (this.m_ApplicationType)
       {
         case "ServiceStationPark":
           this.Hide();
+          Log.Write("ServiceStationPark is the Application type in App Config.");
           int num1 = (int) new frmLogin(this.m_ParkingPermit, "ServiceStationPark", this.m_OverviewLocation, this.m_PlateLocation).ShowDialog();
           break;
         case "PermitPark":
           this.Hide();
           string displayOption1 = "PermitPark";
+          Log.Write("PermitPark is the Application type in App Config.");
           if (this.m_ParkingPermit.PermitType == "STAFF")
           {
             this.m_ParkingPermit.EndDate = DateTime.Parse("9999-12-30 23:59");

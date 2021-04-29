@@ -25,7 +25,7 @@ namespace TouchPark.Services
             }
 
             vrm = vrm.ToUpper().RemoveWhitespace().Trim();
-            var url = _vehicleImageCaptureUrl + "/" + vrm;
+            var url = _vehicleImageCaptureUrl + "/" + vrm ;
             var result = new List<VehicleMovement>();
             var vehicleMovements = _webServiceClient.PostWebResponse(url, null);
             result = JsonConvert.DeserializeObject<List<VehicleMovement>>(vehicleMovements);
